@@ -49,4 +49,9 @@ app.get('/healthz', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+app.post('/submit', express.json(), (req, res) => {
+  const data = req.body
+  res.json({ received: data })
+})
+
 export default app
