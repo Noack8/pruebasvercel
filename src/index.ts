@@ -87,4 +87,28 @@ app.delete('/tareas/:id', async (req, res) => {
   }
 })
 
+app.put('/tareas/:id', express.json(), async (req, res) => {
+  const { id } = req.params
+  const {
+    nombre, descripcion, fecha_asignacion, hora_asignacion,
+    fecha_entrega, hora_entrega, finalizada, prioridad
+  } = req.body
+  try {
+    const result = await pool.query(
+      `UPDATE tareas SET
+        nombre = $1, descripcion = $2,
+        fecha_asignacion = $3, hora_asignacion = $4,
+        fecha_entrega = $5, hora_entrega = $6,
+        finalizada = $7, prioridad = $8
+      WHERE id = $9 RETURNING *`,
+      [nombre, descripcion, fecha_asignacion, hora_asignacion,
+        fecha_entrega, hora_entrega, finalizada, prioridad, id]
+    )
+    res.json(result.rows[0])
+  } catch (err) {
+    console.error('Error al actualizar la base de datos:', err)
+    res.status(500).json({ error: 'Error al actualizar la base de datos' })
+  }
+})
+
 export default app
