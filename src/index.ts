@@ -47,7 +47,7 @@ app.get('/about', function (req, res) {
 
 app.get('/tareas', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tareas')
+    const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
     res.json(result.rows)
   } catch (err) {
     console.error('Error al consultar la base de datos:', err)
