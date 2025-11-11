@@ -51,7 +51,7 @@ app.get('/healthz', (req, res) => {
 
 app.post('/submit', express.json(), (req, res) => {
   const data = req.body
-  res.json({ received: data })
+  res.json({ received: data, status: 'success' })
 })
 
 export default app
