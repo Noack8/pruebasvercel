@@ -60,7 +60,7 @@ app.get('/api-data', (req, res) => {
 // 🚀 Nueva ruta: consulta base de datos Neon
 app.get('/tareas', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tareas wheere id=2')
+    const result = await pool.query('SELECT * FROM tareas where id=2')
     res.json(result.rows)
   } catch (err) {
     console.error('Error al consultar la base de datos:', err)
