@@ -60,7 +60,7 @@ app.get('/api-data', (req, res) => {
 // 🚀 Nueva ruta: consulta base de datos Neon
 app.get('/tareas', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tareas where id=2')
+    const result = await pool.query('SELECT * FROM tareas')
     res.json(result.rows)
   } catch (err) {
     console.error('Error al consultar la base de datos:', err)
@@ -68,17 +68,6 @@ app.get('/tareas', async (req, res) => {
   }
 })
 /*
-CREATE TABLE tareas (
-    id SERIAL PRIMARY KEY,                  -- ID autoincremental
-    nombre VARCHAR(100) NOT NULL,           -- Texto corto
-    descripcion TEXT,                       -- Texto largo
-    fecha_asignacion DATE NOT NULL,         -- Fecha
-    hora_asignacion TIME NOT NULL,          -- Hora
-    fecha_entrega DATE,                     -- Fecha opcional
-    hora_entrega TIME,                      -- Hora opcional
-    finalizada BOOLEAN DEFAULT FALSE,       -- Verdadero o falso
-    prioridad INTEGER CHECK (prioridad BETWEEN 1 AND 10)  -- Valor 1-10
-);
 body -> 
 {
   "nombre": "Tarea de ejemplo",
