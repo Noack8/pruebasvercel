@@ -67,6 +67,50 @@ app.get('/tareas', async (req, res) => {
     res.status(500).json({ error: 'Error al consultar la base de datos' })
   }
 })
+/*
+CREATE TABLE tareas (
+    id SERIAL PRIMARY KEY,                  -- ID autoincremental
+    nombre VARCHAR(100) NOT NULL,           -- Texto corto
+    descripcion TEXT,                       -- Texto largo
+    fecha_asignacion DATE NOT NULL,         -- Fecha
+    hora_asignacion TIME NOT NULL,          -- Hora
+    fecha_entrega DATE,                     -- Fecha opcional
+    hora_entrega TIME,                      -- Hora opcional
+    finalizada BOOLEAN DEFAULT FALSE,       -- Verdadero o falso
+    prioridad INTEGER CHECK (prioridad BETWEEN 1 AND 10)  -- Valor 1-10
+);
+body -> 
+{
+  "nombre": "Tarea de ejemplo",
+  "descripcion": "Esta es una tarea de ejemplo.",
+  "fecha_asignacion": "2024-06-01",
+  "hora_asignacion": "10:00:00",
+  "fecha_entrega": "2024-06-05",
+  "hora_entrega": "18:00:00",
+  "finalizada": false,
+  "prioridad": 5
+}
+*/
+app.post('/tareas', express.json(), async (req, res) => {
+  const {
+    nombre, descripcion, fecha_asignacion, hora_asignacion,
+    fecha_entrega, hora_entrega, finalizada, prioridad
+  } = req.body 
+  try {
+    const result = await pool.query(
+      `INSERT INTO tareas
+        (nombre, descripcion, fecha_asignacion, hora_asignacion,
+          fecha_entrega, hora_entrega, finalizada, prioridad)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [nombre, descripcion, fecha_asignacion, hora_asignacion,
+        fecha_entrega, hora_entrega, finalizada, prioridad]
+    )
+    res.status(201).json(result.rows[0])
+  } catch (err) {
+    console.error('Error al insertar en la base de datos:', err)
+    res.status(500).json({ error: 'Error al insertar en la base de datos' })
+  }
+})
 
 // Health check
 app.get('/healthz', (req, res) => {
