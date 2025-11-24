@@ -109,11 +109,16 @@ app.post('/login', express.json(), async (req, res) => {
 
     const user = result.rows[0];
     
-    // Verificar contraseña (asumiendo que está hasheada)
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
+    // Verificar contraseña sin hash (no recomendado)
+    if (user.password !== password) {
       return res.status(401).json({ error: 'Password incorrecto' });
     }
+
+    // Verificar contraseña (asumiendo que está hasheada)
+    //const validPassword = await bcrypt.compare(password, user.password);
+    //if (!validPassword) {
+    //  return res.status(401).json({ error: 'Password incorrecto' });
+    //}
 
     // Generar token con expiración
     const token = jwt.sign(
