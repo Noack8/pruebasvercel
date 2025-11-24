@@ -96,22 +96,46 @@ app.post('/usuarios', express.json(), async (req, res) => {
 
 // post que me permite verificar si el correo del usuario existe y el password es correcto regresando el id del usuario y un token de autenticacion
 app.post('/login', express.json(), async (req, res) => {
-  const { correo, password } = req.body
+  const { correo, password } = req.body;
   try {
     const result = await pool.query(
-      `SELECT id, nombre FROM usuarios WHERE correo = $1 AND password = $2`,
-      [correo, password]
-    )
-    if (result.rows.length > 0) {
-      res.json({ id: result.rows[0].id, nombre: result.rows[0].nombre, token: 'fake-jwt-token' })
-    } else {
-      res.status(401).json({ error: 'Correo o contraseña incorrectos' })
+      `SELECT id, nombre, password FROM usuarios WHERE correo = $1`,
+      [correo]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
+
+    const user = result.rows[0];
+    
+    // Verificar contraseña (asumiendo que está hasheada)
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    // Generar token con expiración
+    const token = jwt.sign(
+      { 
+        id: user.id,
+        nombre: user.nombre,
+        correo: correo
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' } // Token expira en 24 horas
+    );
+
+    res.json({
+      id: user.id,
+      nombre: user.nombre,
+      token: token
+    });
   } catch (err) {
-    console.error('Error al consultar la base de datos:', err)
-    res.status(500).json({ error: 'Error al consultar la base de datos' })
+    console.error('Error en login:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
-})
+});
 
 app.get('/tareas', async (req, res) => {
   try {
