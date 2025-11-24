@@ -114,12 +114,6 @@ app.post('/login', express.json(), async (req, res) => {
       return res.status(401).json({ error: 'Password incorrecto' });
     }
 
-    // Verificar contraseña (asumiendo que está hasheada)
-    //const validPassword = await bcrypt.compare(password, user.password);
-    //if (!validPassword) {
-    //  return res.status(401).json({ error: 'Password incorrecto' });
-    //}
-
     // Generar token con expiración
     const token = jwt.sign(
       { 
@@ -128,7 +122,7 @@ app.post('/login', express.json(), async (req, res) => {
         correo: correo
       },
       JWT_SECRET,
-      { expiresIn: '24h' } // Token expira en 24 horas
+      { expiresIn: '2h' } // Token expira en 24 horas
     );
 
     res.json({
@@ -142,7 +136,7 @@ app.post('/login', express.json(), async (req, res) => {
   }
 });
 
-app.get('/tareas', async (req, res) => {
+app.get('/tareas', authenticateToken, async (req, res) => {
   try {
     //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
     const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
