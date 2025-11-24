@@ -55,6 +55,22 @@ app.get('/usuarios', async (req, res) => {
   }
 })
 
+// post que crea un nuevo usuario en la base de datos
+app.post('/usuarios', express.json(), async (req, res) => {
+  const { nombre, correo, boleta, carrera, password } = req.body
+  try {
+    const result = await pool.query(
+      `INSERT INTO usuarios (nombre, correo, boleta, carrera, password)
+      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [nombre, correo, boleta, carrera, password]
+    )
+    res.status(201).json(result.rows[0])
+  } catch (err) {
+    console.error('Error al insertar en la base de datos:', err)
+    res.status(500).json({ error: 'Error al insertar en la base de datos' })
+  }
+})
+
 // post que me permite verificar si el correo del usuario existe en la base de datos y devuelve el id del usuario
 app.post('/usuarios/login', express.json(), async (req, res) => {
   const { correo } = req.body
