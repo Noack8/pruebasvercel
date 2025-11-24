@@ -104,7 +104,7 @@ app.post('/login', express.json(), async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+      return res.status(401).json({ error: 'Correo no encontrado' });
     }
 
     const user = result.rows[0];
@@ -112,7 +112,7 @@ app.post('/login', express.json(), async (req, res) => {
     // Verificar contraseña (asumiendo que está hasheada)
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+      return res.status(401).json({ error: 'Password incorrecto' });
     }
 
     // Generar token con expiración
