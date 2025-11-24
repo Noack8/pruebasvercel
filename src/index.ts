@@ -45,6 +45,32 @@ app.get('/about', function (req, res) {
   res.sendFile(path.join(__dirname, '..', 'components', 'about.htm'))
 })
 
+app.get('/usuarios', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM usuarios')
+    res.json(result.rows)
+  } catch (err) {
+    console.error('Error al consultar la base de datos:', err)
+    res.status(500).json({ error: 'Error al consultar la base de datos' })
+  }
+})
+
+// post que me permite verificar si el email del usuario existe en la base de datos y devuelve el id del usuario
+app.post('/usuarios/login', express.json(), async (req, res) => {
+  const { email } = req.body
+  try {
+    const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email])
+    if (result.rows.length > 0) {
+      res.json({ id: result.rows[0].id })
+    } else {
+      res.status(404).json({ error: 'Usuario no encontrado' })
+    }
+  } catch (err) {
+    console.error('Error al consultar la base de datos:', err)
+    res.status(500).json({ error: 'Error al consultar la base de datos' })
+  }
+})
+
 app.get('/tareas', async (req, res) => {
   try {
     //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
