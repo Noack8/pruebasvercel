@@ -3,6 +3,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
 import pkg from 'pg'
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 dotenv.config()
 const { Pool } = pkg
@@ -13,6 +15,27 @@ const pool = new Pool({
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Clave secreta para JWT (debes guardarla en variables de entorno)
+const JWT_SECRET = process.env.JWT_SECRET || 'secreto_super_seguro';
+
+// Middleware para verificar token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Formato: Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token requerido' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Token inválido o expirado' });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 const app = express()
 
