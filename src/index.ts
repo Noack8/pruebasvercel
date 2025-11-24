@@ -71,15 +71,18 @@ app.post('/usuarios', express.json(), async (req, res) => {
   }
 })
 
-// post que me permite verificar si el correo del usuario existe en la base de datos y devuelve el id del usuario
-app.post('/usuarios/login', express.json(), async (req, res) => {
-  const { correo } = req.body
+// post que me permite verificar si el correo del usuario existe y el password es correcto regresando el id del usuario y un token de autenticacion
+app.post('/login', express.json(), async (req, res) => {
+  const { correo, password } = req.body
   try {
-    const result = await pool.query('SELECT id FROM usuarios WHERE correo = $1', [correo])
+    const result = await pool.query(
+      `SELECT id, nombre FROM usuarios WHERE correo = $1 AND password = $2`,
+      [correo, password]
+    )
     if (result.rows.length > 0) {
-      res.json({ id: result.rows[0].id })
+      res.json({ id: result.rows[0].id, nombre: result.rows[0].nombre, token: 'fake-jwt-token' })
     } else {
-      res.status(404).json({ error: 'Usuario no encontrado' })
+      res.status(401).json({ error: 'Correo o contraseña incorrectos' })
     }
   } catch (err) {
     console.error('Error al consultar la base de datos:', err)
