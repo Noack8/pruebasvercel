@@ -55,11 +55,11 @@ app.get('/usuarios', async (req, res) => {
   }
 })
 
-// post que me permite verificar si el email del usuario existe en la base de datos y devuelve el id del usuario
+// post que me permite verificar si el correo del usuario existe en la base de datos y devuelve el id del usuario
 app.post('/usuarios/login', express.json(), async (req, res) => {
-  const { email } = req.body
+  const { correo } = req.body
   try {
-    const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email])
+    const result = await pool.query('SELECT id FROM usuarios WHERE correo = $1', [correo])
     if (result.rows.length > 0) {
       res.json({ id: result.rows[0].id })
     } else {
