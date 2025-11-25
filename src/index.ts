@@ -155,18 +155,6 @@ app.get('/tareas', async (req, res) => {
   }
 });
 
-/*app.get('/tareas', async (req, res) => {
-  try {
-    //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
-    //const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
-    const result = await pool.query('SELECT t.* FROM tareas t JOIN usuario_tarea ut ON t.id = ut.tarea_id WHERE ut.usuario_id = 1')
-    res.json(result.rows)
-  } catch (err) {
-    console.error('Error al consultar la base de datos:', err)
-    res.status(500).json({ error: 'Error al consultar la base de datos' })
-  }
-})*/
-
 app.post('/tareas', express.json(), async (req, res) => {
   const {
     nombre, descripcion, fecha_asignacion, hora_asignacion,
@@ -206,6 +194,50 @@ app.post('/tareas', express.json(), async (req, res) => {
   }
 });
 
+app.delete('/tareas/:id', async (req, res) => {
+  const { id } = req.params;
+  const { usuario_id } = req.query;
+  
+  try {
+    if (!usuario_id) {
+      return res.status(400).json({ error: 'usuario_id es requerido' });
+    }
+    
+    // Verificar que la tarea pertenece al usuario
+    const verificacion = await pool.query(
+      'SELECT 1 FROM usuario_tarea WHERE usuario_id = $1 AND tarea_id = $2',
+      [usuario_id, id]
+    );
+    
+    if (verificacion.rows.length === 0) {
+      return res.status(403).json({ error: 'No tienes permiso para eliminar esta tarea' });
+    }
+    
+    // 1. Primero eliminar la relación en usuario_tarea
+    await pool.query('DELETE FROM usuario_tarea WHERE tarea_id = $1', [id]);
+    
+    // 2. Luego eliminar la tarea
+    await pool.query('DELETE FROM tareas WHERE id = $1', [id]);
+    
+    res.status(204).send();
+  } catch (err) {
+    console.error('Error al eliminar de la base de datos:', err);
+    res.status(500).json({ error: 'Error al eliminar de la base de datos' });
+  }
+});
+
+/*app.get('/tareas', async (req, res) => {
+  try {
+    //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
+    //const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
+    const result = await pool.query('SELECT t.* FROM tareas t JOIN usuario_tarea ut ON t.id = ut.tarea_id WHERE ut.usuario_id = 1')
+    res.json(result.rows)
+  } catch (err) {
+    console.error('Error al consultar la base de datos:', err)
+    res.status(500).json({ error: 'Error al consultar la base de datos' })
+  }
+})*/
+
 /*app.post('/tareas', express.json(), async (req, res) => {
   const {
     nombre, descripcion, fecha_asignacion, hora_asignacion,
@@ -227,7 +259,7 @@ app.post('/tareas', express.json(), async (req, res) => {
   }
 })*/
 
-app.delete('/tareas/:id', async (req, res) => {
+/*app.delete('/tareas/:id', async (req, res) => {
   const { id } = req.params
   try {
     await pool.query('DELETE FROM tareas WHERE id = $1', [id])
@@ -236,7 +268,7 @@ app.delete('/tareas/:id', async (req, res) => {
     console.error('Error al eliminar de la base de datos:', err)
     res.status(500).json({ error: 'Error al eliminar de la base de datos' })
   }
-})
+})*/
 
 app.put('/tareas/:id', express.json(), async (req, res) => {
   const { id } = req.params
