@@ -109,7 +109,6 @@ app.post('/login', express.json(), async (req, res) => {
 
     const user = result.rows[0];
     
-    // Verificar contraseña sin hash (no recomendado)
     if (user.password !== password) {
       return res.status(401).json({ error: 'Password incorrecto' });
     }
@@ -136,7 +135,8 @@ app.post('/login', express.json(), async (req, res) => {
   }
 });
 
-app.get('/tareas', authenticateToken, async (req, res) => {
+//app.get('/tareas', authenticateToken, async (req, res) => {
+app.get('/tareas', async (req, res) => {
   try {
     //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
     const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
