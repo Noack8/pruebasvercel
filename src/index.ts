@@ -139,7 +139,8 @@ app.post('/login', express.json(), async (req, res) => {
 app.get('/tareas', async (req, res) => {
   try {
     //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
-    const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
+    //const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
+    const result = await pool.query('SELECT t.* FROM tareas t JOIN usuario_tarea ut ON t.id = ut.tarea_id WHERE ut.usuario_id = 1')
     res.json(result.rows)
   } catch (err) {
     console.error('Error al consultar la base de datos:', err)
