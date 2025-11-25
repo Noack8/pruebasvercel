@@ -122,7 +122,7 @@ app.post('/login', express.json(), async (req, res) => {
         correo: correo
       },
       JWT_SECRET,
-      { expiresIn: '2h' } // Token expira en 24 horas
+      { expiresIn: '2m' } // Token expira en 24 horas
     );
 
     res.json({
