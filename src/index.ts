@@ -135,8 +135,27 @@ app.post('/login', express.json(), async (req, res) => {
   }
 });
 
-//app.get('/tareas', authenticateToken, async (req, res) => {
 app.get('/tareas', async (req, res) => {
+  try {
+    // Recibir el usuario_id como parámetro de query
+    const usuarioId = req.query.usuario_id;
+    
+    if (!usuarioId) {
+      return res.status(400).json({ error: 'usuario_id es requerido' });
+    }
+    
+    const result = await pool.query(
+      'SELECT t.* FROM tareas t JOIN usuario_tarea ut ON t.id = ut.tarea_id WHERE ut.usuario_id = $1',
+      [usuarioId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al consultar la base de datos:', err);
+    res.status(500).json({ error: 'Error al consultar la base de datos' });
+  }
+});
+
+/*app.get('/tareas', async (req, res) => {
   try {
     //const result = await pool.query('SELECT * FROM tareas ORDER BY id ASC')
     //const result = await pool.query('SELECT * FROM tareas ORDER BY finalizada')
@@ -146,7 +165,7 @@ app.get('/tareas', async (req, res) => {
     console.error('Error al consultar la base de datos:', err)
     res.status(500).json({ error: 'Error al consultar la base de datos' })
   }
-})
+})*/
 
 app.post('/tareas', express.json(), async (req, res) => {
   const {
