@@ -170,6 +170,45 @@ app.get('/tareas', async (req, res) => {
 app.post('/tareas', express.json(), async (req, res) => {
   const {
     nombre, descripcion, fecha_asignacion, hora_asignacion,
+    fecha_entrega, hora_entrega, finalizada, prioridad,
+    usuario_id  // ← Nuevo campo que recibimos del cliente
+  } = req.body;
+  
+  try {
+    // Validar que tenemos el usuario_id
+    if (!usuario_id) {
+      return res.status(400).json({ error: 'usuario_id es requerido' });
+    }
+
+    // 1. Primero insertar en la tabla tareas
+    const tareaResult = await pool.query(
+      `INSERT INTO tareas
+        (nombre, descripcion, fecha_asignacion, hora_asignacion,
+          fecha_entrega, hora_entrega, finalizada, prioridad)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [nombre, descripcion, fecha_asignacion, hora_asignacion,
+        fecha_entrega, hora_entrega, finalizada, prioridad]
+    );
+
+    const tarea = tareaResult.rows[0];
+
+    // 2. Luego insertar en la tabla usuario_tarea la relación
+    await pool.query(
+      `INSERT INTO usuario_tarea (usuario_id, tarea_id)
+       VALUES ($1, $2)`,
+      [usuario_id, tarea.id]
+    );
+
+    res.status(201).json(tarea);
+  } catch (err) {
+    console.error('Error al insertar en la base de datos:', err);
+    res.status(500).json({ error: 'Error al insertar en la base de datos' });
+  }
+});
+
+/*app.post('/tareas', express.json(), async (req, res) => {
+  const {
+    nombre, descripcion, fecha_asignacion, hora_asignacion,
     fecha_entrega, hora_entrega, finalizada, prioridad
   } = req.body 
   try {
@@ -186,7 +225,7 @@ app.post('/tareas', express.json(), async (req, res) => {
     console.error('Error al insertar en la base de datos:', err)
     res.status(500).json({ error: 'Error al insertar en la base de datos' })
   }
-})
+})*/
 
 app.delete('/tareas/:id', async (req, res) => {
   const { id } = req.params
